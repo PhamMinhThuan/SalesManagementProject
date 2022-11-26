@@ -280,3 +280,53 @@ GO
 
 --- Check table ---
 SELECT * FROM KHACHHANG
+
+/* Tạo FUNCTION 
+*/
+
+--- function tính tuổi khách hàng  ---
+CREATE FUNCTION FC_TinhTuoi
+(@MAKH VARCHAR(20)) RETURNS INT 
+AS
+BEGIN
+	DECLARE @Tuoi INT
+	IF NOT EXISTS ( SELECT * 
+					FROM KHACHHANG 
+					WHERE MAKH = @MAKH)
+	RETURN 0
+	ELSE
+	BEGIN
+		SELECT @Tuoi = DATEDIFF(YEAR, NGSINH, GETDATE())
+		FROM KHACHHANG
+		WHERE MAKH = @MAKH
+	END
+	RETURN @Tuoi
+END
+GO
+
+--- Kiểm tra ---
+PRINT dbo.FC_TinhTuoi('KH01')
+
+--- Function tách tên khách hàng ---
+SELECT * FROM KHACHHANG
+ALTER FUNCTION FC_TachTen
+(@Hoten VARCHAR(20)) RETURNS VARCHAR(20) 
+AS
+BEGIN
+	DECLARE @Len INT, @i INT, @j INT, @kq VARCHAR(20)
+	SELECT @Len = LEN(@Hoten), @i = 1, @j =1
+	WHILE @i <= @Len
+	BEGIN
+		IF (SUBSTRING(@Hoten, @i, 1) = ' ')
+		BEGIN
+			SET @j = @i
+		END
+		SET @i = @i + 1
+	END
+	SET @kq = SUBSTRING( @Hoten, @j+1, 15)
+	RETURN @kq
+END
+GO
+
+--- Kiểm tra ---
+PRINT dbo.FC_TachTen('Pham Minh Thuan')
